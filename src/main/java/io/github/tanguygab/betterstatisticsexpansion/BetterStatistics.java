@@ -30,7 +30,8 @@ public final class BetterStatistics extends PlaceholderExpansion implements Task
                 "<statistic>_in_<world>",
                 "deaths",
                 "kills",
-                "bred.<animal>","bred.*"
+                "bred.<animal>", "bred.*",
+                "smelt.<item>", "smelt.*"
         );
 
         placeholders.forEach(placeholder -> this.placeholders.add("%"+getIdentifier()+"_"+placeholder+"%"));
@@ -118,8 +119,11 @@ public final class BetterStatistics extends PlaceholderExpansion implements Task
         config.set(player.getUniqueId()+"."+type+"."+world, value);
     }
 
+    public void incValue(OfflinePlayer player, String type, World world, int inc) {
+        setValue(player, type, world.getName(), getInt(player, type, world.getName()) + inc);
+    }
     public void incValue(OfflinePlayer player, String type, World world) {
-        setValue(player, type, world.getName(), getInt(player, type, world.getName()) + 1);
+        incValue(player, type, world, 1);
     }
 
 
