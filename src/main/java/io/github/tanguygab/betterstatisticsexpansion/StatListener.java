@@ -20,13 +20,6 @@ public class StatListener implements Listener {
         this.expansion = expansion;
     }
 
-    @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
-    public void onBlockBreak(BlockBreakEvent e) {
-        Player player = e.getPlayer();
-        String block = e.getBlock().getType().toString();
-        expansion.incValue(player, "blocks-broken."+block, player.getWorld());
-    }
-
     @EventHandler
     public void onDeath(PlayerDeathEvent e) {
         Player player = e.getEntity();
@@ -57,6 +50,28 @@ public class StatListener implements Listener {
 
         expansion.incValue(player, "smelt." + item.getType(), player.getWorld(), amount);
         expansion.incValue(player, "smelt.*"                , player.getWorld(), amount);
+    }
+
+    private final NamespaceKey placedBlockKey = new NamespacedKey(expansion.getPlaceholderAPI(), "placed");
+
+    @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
+    public void onBlockPlace(BlockPlaceEvent e) {
+        Player player = e.getPlayer();
+        BlocksData.setPersistentData(e.getBlockPlaced(), placedBlockKey, PersistentDataType.BOOLEAN, true);
+        expansion.incValue(player, "placed." + block.getType(), player.getWorld());
+        expansion.incValue(player, "placed.*"                 , player.getWorld());
+    }
+
+    @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
+    public void onBlockBreak(BlockBreakEvent e) {
+        Player player = e.getPlayer();
+        Block block = e.getBlock();
+        expansion.incValue(player, "generated-blocks-broken." + block.getType(), player.getWorld());
+        expansion.incValue(player, "generated-blocks-broken.*"                 , player.getWorld());
+        if (BlocksData.hasPersistentData(block, placedBlockKey)) return;
+
+        expansion.incValue(player, "blocks-broken." + block.getType(), player.getWorld());
+        expansion.incValue(player, "blocks-broken.*"                 , player.getWorld());
     }
 
 }
