@@ -6,7 +6,7 @@ import org.bukkit.persistence.PersistentDataType;
 
 public class BlocksData {
 
-    public static <P, C> void setPersistentData(
+    public static <P, C> void set(
             Block block,
             NamespacedKey key,
             PersistentDataType<P, C> dataType,
@@ -16,10 +16,10 @@ public class BlocksData {
         block.getChunk().getPersistentDataContainer().set(newKey, dataType, value);
     }
 
-    public static boolean hasPersistentData(Block block, NamespacedKey key) {
+    public static boolean has(Block block, NamespacedKey key) {
         return block.getChunk().getPersistentDataContainer().has(createKey(block, key));
     }
-    public static void removePersistentData(Block block, NamespacedKey key) {
+    public static void remove(Block block, NamespacedKey key) {
         block.getChunk().getPersistentDataContainer().remove(createKey(block, key));
     }
 
