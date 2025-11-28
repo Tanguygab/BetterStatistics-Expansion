@@ -1,16 +1,10 @@
 package io.github.tanguygab.betterstatisticsexpansion;
 
+import org.bukkit.NamespacedKey;
+import org.bukkit.block.Block;
+import org.bukkit.persistence.PersistentDataType;
+
 public class BlocksData {
-
-
-    public static Object getPersistentData(
-            Block block,
-            NamespacedKey key,
-            PersistentDataType<?, ?> dataType
-    ) {
-        NamespacedKey newKey = createKey(block, key);
-        return chunk.persistentDataContainer.get(block, newKey, dataType);
-    }
 
     public static <P, C> void setPersistentData(
             Block block,
@@ -19,19 +13,22 @@ public class BlocksData {
             C value
     ) {
         NamespacedKey newKey = createKey(block, key);
-        chunk.persistentDataContainer.set(newKey, dataType, value);
+        block.getChunk().getPersistentDataContainer().set(newKey, dataType, value);
     }
 
     public static boolean hasPersistentData(Block block, NamespacedKey key) {
-        return chunk.persistentDataContainer.has(createKey(key));
+        return block.getChunk().getPersistentDataContainer().has(createKey(block, key));
+    }
+    public static void removePersistentData(Block block, NamespacedKey key) {
+        block.getChunk().getPersistentDataContainer().remove(createKey(block, key));
     }
 
-    private NamespacedKey createKey(Block block, NamespacedKey key) {
-        val namespace = key.namespace;
-        val keyValue = key.key;
+    private static NamespacedKey createKey(Block block, NamespacedKey key) {
+        String namespace = key.getNamespace();
+        String keyValue = key.getKey();
 
-        val newKeyValue = keyValue + "," + (block.getX() - block.getChunk().getX()) + "," + (block.getY() - block.getChunk().getY()) + "," + (block.getZ() - block.getChunk().getZ());
-
-        return NamespacedKey(namespace, newKeyValue);
+        String newKeyValue = keyValue + "_" + (block.getX() - block.getChunk().getX()) + "-" + (block.getY() - block.getY()) + "-" + (block.getZ() - block.getChunk().getZ());
+        //noinspection UnstableApiUsage
+        return new NamespacedKey(namespace, newKeyValue);
     }
 }

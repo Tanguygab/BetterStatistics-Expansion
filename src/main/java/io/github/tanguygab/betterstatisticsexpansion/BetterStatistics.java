@@ -1,5 +1,7 @@
 package io.github.tanguygab.betterstatisticsexpansion;
 
+import io.github.tanguygab.betterstatisticsexpansion.listeners.BlockListener;
+import io.github.tanguygab.betterstatisticsexpansion.listeners.PlayerListener;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import me.clip.placeholderapi.expansion.Taskable;
 import org.bukkit.OfflinePlayer;
@@ -20,7 +22,7 @@ public final class BetterStatistics extends PlaceholderExpansion implements Task
 
     public File file;
     public FileConfiguration config;
-    private StatListener listener;
+    private final List<StatListener> listeners;
     private final List<String> placeholders = new ArrayList<>();
 
     public BetterStatistics() {
@@ -33,8 +35,9 @@ public final class BetterStatistics extends PlaceholderExpansion implements Task
                 "bred.<animal>", "bred.*",
                 "smelt.<item>", "smelt.*"
         );
-
         placeholders.forEach(placeholder -> this.placeholders.add("%"+getIdentifier()+"_"+placeholder+"%"));
+
+        listeners = List.of(new PlayerListener(this), new BlockListener(this));
     }
 
     @Override
@@ -69,12 +72,14 @@ public final class BetterStatistics extends PlaceholderExpansion implements Task
         try {config.load(file);}
         catch (Exception e) {throw new RuntimeException(e);}
 
-        getPlaceholderAPI().getServer().getPluginManager().registerEvents(listener = new StatListener(this), getPlaceholderAPI());
+        for (StatListener listener : listeners) {
+            getPlaceholderAPI().getServer().getPluginManager().registerEvents(listener, getPlaceholderAPI());
+        }
     }
 
     @Override
     public void stop() {
-        HandlerList.unregisterAll(listener);
+        listeners.forEach(HandlerList::unregisterAll);
         try {config.save(file);}
         catch (IOException e) {throw new RuntimeException(e);}
     }
