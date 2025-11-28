@@ -27,7 +27,7 @@ public class BlocksData {
         String namespace = key.getNamespace();
         String keyValue = key.getKey();
 
-        String newKeyValue = keyValue + "_" + (block.getX() - block.getChunk().getX()) + "-" + (block.getY() - block.getY()) + "-" + (block.getZ() - block.getChunk().getZ());
+        String newKeyValue = keyValue + "_" + (block.getX() - block.getChunk().getX()) + "-" + block.getY() + "-" + (block.getZ() - block.getChunk().getZ());
         //noinspection UnstableApiUsage
         return new NamespacedKey(namespace, newKeyValue);
     }
