@@ -1,5 +1,6 @@
 package io.github.tanguygab.betterstatisticsexpansion.listeners;
 
+import com.sun.source.tree.BreakTree;
 import io.github.tanguygab.betterstatisticsexpansion.BetterStatistics;
 import io.github.tanguygab.betterstatisticsexpansion.StatListener;
 import org.bukkit.Material;
@@ -11,6 +12,8 @@ import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.ItemStack;
+
+import java.util.Arrays;
 
 public class PlayerListener extends StatListener {
 
@@ -37,15 +40,34 @@ public class PlayerListener extends StatListener {
 
     @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
     public void onItemSmelt(InventoryClickEvent e) {
-        if (!(e.getWhoClicked() instanceof Player player) || e.getSlotType() != InventoryType.SlotType.RESULT) return;
+        if (!(e.getWhoClicked() instanceof Player player)) return;
+        ItemStack item = e.getInventory().getItem(2);
+        if (item == null) return;
 
-        ItemStack item = e.getCurrentItem();
-        ItemStack cursor = player.getItemOnCursor();
-        if (item == null || item.getType() == Material.AIR || !item.isSimilar(cursor)) return;
+        int amount = 0;
+        if (e.getSlotType() == InventoryType.SlotType.RESULT) {
+            amount = switch (e.getAction()) {
+                case NOTHING, CLONE_STACK -> 0;
+                case DROP_ONE_SLOT -> 1;
+                case MOVE_TO_OTHER_INVENTORY -> {
+                    if (player.getInventory().firstEmpty() != -1) yield item.getAmount();
 
-        int amount = item.getAmount();
-        if (cursor.getMaxStackSize() - cursor.getAmount() < amount) return;
-
+                    if (player.getInventory().contains(item.getType())) {
+                        int space = Arrays.stream(player.getInventory().getStorageContents())
+                                .filter(item::isSimilar)
+                                .mapToInt(stack -> stack.getMaxStackSize() - stack.getAmount())
+                                .sum();
+                        yield Math.min(space, item.getAmount());
+                    }
+                    yield 0;
+                }
+                case PICKUP_HALF -> Math.ceilDiv(item.getAmount(), 2);
+                default -> item.getAmount();
+            };
+        } else {
+            if (e.getCursor() != null && item.isSimilar(e.getCursor()) && e.getCursor().getAmount() + item.getAmount() < e.getCursor().getMaxStackSize())
+                amount = item.getAmount();
+        }
         expansion.incValue(player, "smelt." + item.getType(), player.getWorld(), amount);
         expansion.incValue(player, "smelt.*"                , player.getWorld(), amount);
     }
