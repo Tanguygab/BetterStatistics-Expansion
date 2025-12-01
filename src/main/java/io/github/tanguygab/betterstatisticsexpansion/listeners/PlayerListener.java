@@ -1,9 +1,7 @@
 package io.github.tanguygab.betterstatisticsexpansion.listeners;
 
-import com.sun.source.tree.BreakTree;
 import io.github.tanguygab.betterstatisticsexpansion.BetterStatistics;
 import io.github.tanguygab.betterstatisticsexpansion.StatListener;
-import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
