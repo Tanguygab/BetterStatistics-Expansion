@@ -35,8 +35,10 @@ public final class BetterStatistics extends PlaceholderExpansion implements Task
                 "bred.<animal>", "bred.*",
                 "smelt.<item>", "smelt.*",
                 "blocks-placed.<block>", "blocks-placed.*",
-                "blocks-broken.<block>", "blocks-broken.*",
-                "generated-blocks-broken.<block>", "generated-blocks-broken.*"
+                "blocks-broken.<block>", "blocks-broken.GROWN_<crop>", "blocks-broken.*",
+                "generated-blocks-broken.<block>", "generated-blocks-broken.GROWN_<crop>", "generated-blocks-broken.*",
+                "crops-broken.<crop>", "crops-broken.*",
+                "generated-crops-broken.<crop>", "generated-crops-broken.*"
         );
         placeholders.forEach(placeholder -> this.placeholders.add("%"+getIdentifier()+"_"+placeholder+"%"));
 

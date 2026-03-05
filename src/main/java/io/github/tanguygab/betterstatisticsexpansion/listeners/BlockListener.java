@@ -8,6 +8,8 @@ import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.PistonMoveReaction;
+import org.bukkit.block.data.Ageable;
+import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -15,6 +17,7 @@ import org.bukkit.event.block.*;
 import org.bukkit.event.entity.EntityChangeBlockEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.world.StructureGrowEvent;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataType;
 
 import java.util.List;
@@ -44,6 +47,8 @@ public class BlockListener extends StatListener {
         Player player = e.getPlayer();
         Block block = e.getBlock();
 
+        boolean crop = block.getBlockData() instanceof Ageable ageable && ageable.getAge() == ageable.getMaximumAge();
+        if (crop) expansion.incValue(player, "blocks-broken.GROWN_" + block.getType(), player.getWorld());
         expansion.incValue(player, "blocks-broken." + block.getType(), player.getWorld());
         expansion.incValue(player, "blocks-broken.*"                 , player.getWorld());
 
@@ -51,8 +56,35 @@ public class BlockListener extends StatListener {
             BlocksData.remove(block, placedBlockKey);
             return;
         }
+
+        if (crop) expansion.incValue(player, "generated-blocks-broken.GROWN_" + block.getType(), player.getWorld());
         expansion.incValue(player, "generated-blocks-broken." + block.getType(), player.getWorld());
         expansion.incValue(player, "generated-blocks-broken.*"                 , player.getWorld());
+    }
+
+    @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
+    public void onDrop(BlockDropItemEvent e) {
+        BlockState block = e.getBlockState();
+        System.out.println("hi " + block.getType());
+        if (!(block.getBlockData() instanceof Ageable ageable) || ageable.getAge() != ageable.getMaximumAge()) return;
+
+        int amount = e.getItems()
+                .stream()
+                .map(Item::getItemStack)
+                .filter(item -> block.getType().toString().matches(item.getType() + "(E?S)?"))
+                .mapToInt(ItemStack::getAmount)
+                .sum();
+        System.out.println(amount);
+        Player player = e.getPlayer();
+        expansion.incValue(player, "crops-broken." + block.getType(), player.getWorld(), amount);
+        expansion.incValue(player, "crops-broken.*"                 , player.getWorld(), amount);
+
+        if (BlocksData.has(e.getBlock(), placedBlockKey)) {
+            BlocksData.remove(e.getBlock(), placedBlockKey);
+            return;
+        }
+        expansion.incValue(player, "generated-crops-broken." + block.getType(), player.getWorld(), amount);
+        expansion.incValue(player, "generated-crops-broken.*"                 , player.getWorld(), amount);
     }
 
     private void onRemovedBlock(Block block) {
