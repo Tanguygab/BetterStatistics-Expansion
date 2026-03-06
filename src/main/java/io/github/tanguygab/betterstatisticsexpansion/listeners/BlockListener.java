@@ -65,7 +65,6 @@ public class BlockListener extends StatListener {
     @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
     public void onDrop(BlockDropItemEvent e) {
         BlockState block = e.getBlockState();
-        System.out.println("hi " + block.getType());
         if (!(block.getBlockData() instanceof Ageable ageable) || ageable.getAge() != ageable.getMaximumAge()) return;
 
         int amount = e.getItems()
@@ -74,7 +73,7 @@ public class BlockListener extends StatListener {
                 .filter(item -> block.getType().toString().matches(item.getType() + "(E?S)?"))
                 .mapToInt(ItemStack::getAmount)
                 .sum();
-        System.out.println(amount);
+
         Player player = e.getPlayer();
         expansion.incValue(player, "crops-broken." + block.getType(), player.getWorld(), amount);
         expansion.incValue(player, "crops-broken.*"                 , player.getWorld(), amount);
