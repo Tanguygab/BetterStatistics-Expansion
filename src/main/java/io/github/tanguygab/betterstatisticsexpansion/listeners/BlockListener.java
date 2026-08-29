@@ -95,16 +95,16 @@ public class BlockListener extends StatListener {
         blocks.forEach(this::onRemovedBlock);
     }
 
-    private void onMovedBlock(Block oldBlock, Block newBlock) {
-        BlocksData.remove(oldBlock, placedBlockKey);
-        if (newBlock != null) BlocksData.set(newBlock, placedBlockKey, PersistentDataType.BOOLEAN, true);
-    }
-
     private void onMovedBlocks(List<Block> blocks, BlockFace direction) {
-        blocks.stream().filter(block -> BlocksData.has(block, placedBlockKey)).forEach(block -> {
-            PistonMoveReaction reaction = block.getPistonMoveReaction();
-            onMovedBlock(block, reaction == PistonMoveReaction.BREAK ? null : block.getRelative(direction));
-        });
+        blocks.stream()
+                .filter(block -> BlocksData.has(block, placedBlockKey))
+                .peek(block -> BlocksData.remove(block, placedBlockKey))
+                .toList() // ending stream, to fully remove data in peek() before adding it back in forEach()
+                .forEach(block -> {
+                    PistonMoveReaction reaction = block.getPistonMoveReaction();
+                    if (reaction == PistonMoveReaction.BREAK) return;
+                    BlocksData.set(block.getRelative(direction), placedBlockKey, PersistentDataType.BOOLEAN, true);
+                });
     }
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)

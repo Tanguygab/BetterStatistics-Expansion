@@ -10,8 +10,6 @@ import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.event.HandlerList;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.io.IOException;
@@ -46,22 +44,22 @@ public final class BetterStatistics extends PlaceholderExpansion implements Task
     }
 
     @Override
-    public @NotNull String getIdentifier() {
+    public String getIdentifier() {
         return "betterstatistics";
     }
 
     @Override
-    public @NotNull String getAuthor() {
+    public String getAuthor() {
         return "Tanguygab";
     }
 
     @Override
-    public @NotNull String getVersion() {
+    public  String getVersion() {
         return "1.0.0";
     }
 
     @Override
-    public @NotNull List<String> getPlaceholders() {
+    public List<String> getPlaceholders() {
         return placeholders;
     }
 
@@ -90,7 +88,7 @@ public final class BetterStatistics extends PlaceholderExpansion implements Task
     }
 
     @Override
-    public @Nullable String onRequest(OfflinePlayer player, @NotNull String params) {
+    public String onRequest(OfflinePlayer player, String params) {
 
         if (params.endsWith("_current") && player.getPlayer() != null) {
             String type = params.substring(0, params.length()-8);
